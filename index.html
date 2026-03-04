@@ -629,15 +629,23 @@
     renderAll(); save();
   }
 
-  function restoreNames() {
-    ensureDefaults();
-    for (let i=0; i<Math.min(8, riders.length); i++) {
-      riders[i].name = DEFAULT_NAMES[i];
-      riders[i].color = PALETTE[i % PALETTE.length];
-    }
-    nextIndex = 0;
-    renderAll(); save();
-  }
+function restoreNames() {
+
+  riders = DEFAULT_NAMES.map((name, i) => ({
+    id: uid(),
+    name,
+    color: PALETTE[i % PALETTE.length],
+    events: [],
+    sectorIdx: 0,
+    lastTapEpoch: 0,
+    redo: []
+  }));
+
+  nextIndex = 0;
+
+  renderAll();
+  save();
+}
 
   function exportExcelLikeXls() {
     const summary = riders.map((r) => {
