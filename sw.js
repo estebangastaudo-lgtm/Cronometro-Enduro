@@ -1,4 +1,4 @@
-const CACHE = "cronometro-equipo-v2-1";
+const CACHE = "cronometro-enduro-v3-1";
 const ASSETS = [
   "./",
   "./index.html",
