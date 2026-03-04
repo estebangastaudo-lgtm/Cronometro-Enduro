@@ -63,10 +63,36 @@
       padding: 10px 10px; border-radius: 10px; font-size: 14px;
     }
     .cfg .list { display:grid; gap:8px; margin-top: 10px; }
-    /* Config lista pilotos: input grande y botones chicos */ .rline{   display:grid;   grid-template-columns: 1fr 44px 44px 84px; /* Nombre | ↑ | ↓ | Borrar */   gap:8px;   align-items:center; } .rline input{   min-width: 0;   width: 100%;   font-size: 16px;   padding: 10px 12px; } .rline button{   padding: 10px 0;   font-size: 14px;   font-weight: 900;   text-align:center; }
-    .rline .colorDot { width: 18px; height:18px; border-radius: 999px; border:2px solid #26365c; }
-    .rline .nameWrap { display:flex; align-items:center; gap:10px; }
-    .rline small { opacity:.7; }
+/* Config lista pilotos: input grande y botones clickeables */
+.rline{
+  display:grid;
+  grid-template-columns: 1fr 44px 44px 90px; /* Nombre | ↑ | ↓ | Borrar */
+  gap:8px;
+  align-items:center;
+}
+
+.rline .nameWrap{
+  min-width: 0;
+}
+
+.rline input{
+  min-width: 0;
+  width: 100%;
+  font-size: 16px;
+  padding: 10px 12px;
+}
+
+.rline button{
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 900;
+  text-align:center;
+}
+
+/* Asegura que "Borrar" sea clickeable y visible */
+.rline button.warn{
+  width: 100%;
+}
     .cfg .note { margin-top: 8px; font-size: 12px; opacity: .7; line-height: 1.25; }
 
     .tables { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
@@ -331,7 +357,7 @@ const delBtn = document.createElement("button");
 delBtn.textContent = "Borrar";
 delBtn.classList.add("warn");
 delBtn.disabled = riders.length <= 1;
-delBtn.addEventListener("click", () => removeRider(idx));
+delBtn.addEventListener("click", (e) => {   e.preventDefault();   e.stopPropagation();   removeRider(idx); });
 
 row.appendChild(nameWrap);
 row.appendChild(upBtn);
