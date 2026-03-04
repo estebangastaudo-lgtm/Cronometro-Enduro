@@ -63,7 +63,7 @@
       padding: 10px 10px; border-radius: 10px; font-size: 14px;
     }
     .cfg .list { display:grid; gap:8px; margin-top: 10px; }
-    .rline { display:grid; grid-template-columns: 1fr 120px 120px; gap:8px; align-items:center; }
+    /* Config lista pilotos: input grande y botones chicos */ .rline{   display:grid;   grid-template-columns: 1fr 44px 44px 84px; /* Nombre | ↑ | ↓ | Borrar */   gap:8px;   align-items:center; } .rline input{   min-width: 0;   width: 100%;   font-size: 16px;   padding: 10px 12px; } .rline button{   padding: 10px 0;   font-size: 14px;   font-weight: 900;   text-align:center; }
     .rline .colorDot { width: 18px; height:18px; border-radius: 999px; border:2px solid #26365c; }
     .rline .nameWrap { display:flex; align-items:center; gap:10px; }
     .rline small { opacity:.7; }
@@ -198,6 +198,7 @@
   let rafId = null;
 
   let riders = []; // {id,name,color,events[],sectorIdx,lastTapEpoch,redo[]}
+  let nextIndex = 0; // PRO: próximo piloto sugerido
 
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(2, 8); }
 
@@ -266,7 +267,7 @@
 
     riders.forEach((r, idx) => {
       const b = document.createElement("button");
-      b.className = "riderBtn";
+      b.className = "riderBtn";if (idx === nextIndex) b.classList.add("next");
       b.style.borderColor = r.color;
       b.style.boxShadow = `0 0 0 1px ${r.color}25 inset`;
       b.disabled = !running;
@@ -307,31 +308,41 @@
       nameInput.placeholder = "Nombre";
       nameInput.addEventListener("input", () => {
         r.name = (nameInput.value || "").trim() || `Piloto ${idx+1}`;
+        nextIndex = (idx + 1) % riders.length;
         renderButtons(); renderTables(); save();
       });
 
       nameWrap.appendChild(dot);
       nameWrap.appendChild(nameInput);
 
-      const upBtn = document.createElement("button");
-      upBtn.textContent = "↑";
-      upBtn.disabled = idx === 0;
-      upBtn.addEventListener("click", () => move(idx, -1));
+const upBtn = document.createElement("button");
+upBtn.textContent = "↑";
+upBtn.disabled = idx === 0;
+upBtn.title = "Subir";
+upBtn.addEventListener("click", () => move(idx, -1));
 
-      const delBtn = document.createElement("button");
-      delBtn.textContent = "Borrar";
-      delBtn.disabled = riders.length <= 1;
-      delBtn.addEventListener("click", () => removeRider(idx));
+const downBtn = document.createElement("button");
+downBtn.textContent = "↓";
+downBtn.disabled = idx === riders.length - 1;
+downBtn.title = "Bajar";
+downBtn.addEventListener("click", () => move(idx, +1));
 
-      row.appendChild(nameWrap);
-      row.appendChild(upBtn);
-      row.appendChild(delBtn);
+const delBtn = document.createElement("button");
+delBtn.textContent = "Borrar";
+delBtn.classList.add("warn");
+delBtn.disabled = riders.length <= 1;
+delBtn.addEventListener("click", () => removeRider(idx));
+
+row.appendChild(nameWrap);
+row.appendChild(upBtn);
+row.appendChild(downBtn);
+row.appendChild(delBtn);
 
       ridersList.appendChild(row);
     });
 
     const hint = document.createElement("div");
-    hint.innerHTML = `<small>Orden = orden de largada (offset). Podés reordenar con ↑.</small>`;
+    hint.innerHTML = `<small>Orden = orden de largada (offset). Podés reordenar con ↑ / ↓.</small>`;
     hint.style.opacity = ".75";
     hint.style.marginTop = "6px";
     ridersList.appendChild(hint);
@@ -485,7 +496,15 @@
     riders.push({ id: uid(), name: (name || `Piloto ${i+1}`), color: PALETTE[i % PALETTE.length], events: [], sectorIdx: 0, lastTapEpoch: 0, redo: [] });
     renderAll(); save();
   }
-  function removeRider(idx) { const r = riders[idx]; if (!confirm(`¿Borrar a ${r.name}? (se pierden sus tiempos)`)) return; riders.splice(idx,1); renderAll(); save(); }
+  function move(idx, dir) {
+  const j = idx + dir;
+  if (j < 0 || j >= riders.length) return;
+  const tmp = riders[idx];
+  riders[idx] = riders[j];
+  riders[j] = tmp;
+  nextIndex = 0;
+  renderAll(); save();
+}
   function move(idx, dir) { const j = idx + dir; if (j < 0 || j >= riders.length) return; const tmp = riders[idx]; riders[idx] = riders[j]; riders[j] = tmp; renderAll(); save(); }
 
   function restoreNames() {
@@ -579,3 +598,11 @@
 </script>
 </body>
 </html>
+/* PRO: resaltar próximo piloto */
+.riderBtn.next {
+  outline: 4px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.10) inset,
+    0 0 0 3px rgba(0,0,0,.35),
+    0 0 22px rgba(255,255,255,.10);
+}
