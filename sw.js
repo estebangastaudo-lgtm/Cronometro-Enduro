@@ -1,9 +1,10 @@
-const CACHE = "cronometro-enduro-v3-1";
+const CACHE = "cronometro-enduro-v4-1";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon.svg"
+  "./icon-512.png",
+  "./apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -24,7 +25,6 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   event.respondWith(
     caches.match(req).then((cached) => cached || fetch(req).then((resp) => {
-      // Cache new same-origin GET responses
       try {
         const url = new URL(req.url);
         if (req.method === "GET" && url.origin === location.origin) {
