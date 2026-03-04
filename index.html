@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cronómetro Equipo v2</title>
+  <title>Cronómetro Enduro</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <style>
     :root { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif; }
     body { margin: 0; background: #0b0f17; color: #e8eefc; }
@@ -16,8 +22,7 @@
     .topgrid { display: grid; grid-template-columns: 1fr; gap: 10px; }
     @media (min-width: 860px) { .topgrid { grid-template-columns: 1.1fr .9fr; } }
 
-    .controls { display: grid; gap: 10px; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .controlsTop { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
     button {
       padding: 14px 12px; border-radius: 14px; border: 1px solid #26365c;
       background: #1a2642; color: #e8eefc; font-size: 16px; font-weight: 850;
@@ -31,8 +36,8 @@
 
     .cfg { background: #0e1526; border: 1px solid #1f2a44; border-radius: 14px; padding: 12px; }
     .cfg h2 { margin: 0 0 10px; font-size: 14px; opacity: .9; }
-    .cfg .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .cfg .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .cfg .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .cfg label { font-size: 12px; opacity: .82; display: block; margin-bottom: 4px; }
     .cfg input, .cfg select {
       width: 100%; box-sizing: border-box;
@@ -45,14 +50,28 @@
     @media (min-width: 860px) { .btns { grid-template-columns: 1fr 1fr 1fr 1fr; } }
 
     .riderBtn {
-      display: grid; gap: 6px;
+      display: grid; gap: 8px;
       background: #0e1526; border: 1px solid #1f2a44; border-radius: 14px;
       padding: 12px; text-align: left;
     }
-    .riderBtn .name { font-weight: 950; font-size: 18px; }
-    .riderBtn .meta { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; opacity: .9; font-size: 13px; }
-    .riderBtn .hint { opacity: .7; font-size: 12px; font-variant-numeric: tabular-nums; }
-    .riderBtn .badge { display:inline-block; padding: 2px 8px; border-radius: 999px; border:1px solid #26365c; font-size: 12px; opacity: .9; }
+    .riderBtn .name { font-weight: 950; font-size: 20px; line-height: 1.05; }
+    .riderBtn .line1 { font-size: 14px; opacity: .92; font-variant-numeric: tabular-nums; }
+    .riderBtn .line2 { display:flex; justify-content: space-between; gap: 10px; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .riderBtn .label { opacity:.7; font-weight: 800; }
+    .riderBtn .val { font-weight: 950; }
+
+    /* Colores por piloto (borde + acento) */
+    .r0 { border-color:#2a4cff; box-shadow: 0 0 0 1px rgba(42,76,255,.15) inset; }
+    .r1 { border-color:#00c2ff; box-shadow: 0 0 0 1px rgba(0,194,255,.15) inset; }
+    .r2 { border-color:#00d084; box-shadow: 0 0 0 1px rgba(0,208,132,.15) inset; }
+    .r3 { border-color:#ffb000; box-shadow: 0 0 0 1px rgba(255,176,0,.15) inset; }
+    .r4 { border-color:#ff5c7a; box-shadow: 0 0 0 1px rgba(255,92,122,.15) inset; }
+    .r5 { border-color:#b56bff; box-shadow: 0 0 0 1px rgba(181,107,255,.15) inset; }
+    .r6 { border-color:#7bdcff; box-shadow: 0 0 0 1px rgba(123,220,255,.15) inset; }
+    .r7 { border-color:#a7ff4f; box-shadow: 0 0 0 1px rgba(167,255,79,.15) inset; }
+
+    .bottomActions { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px; }
+    @media (min-width: 860px) { .bottomActions { grid-template-columns: 1fr 1fr 1fr 1fr; } }
 
     .tables { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
     @media (min-width: 860px) { .tables { grid-template-columns: 1fr 1fr; } }
@@ -74,41 +93,36 @@
     body.buttonsOnly .wrap { max-width: 1000px; }
     body.buttonsOnly .time { font-size: 58px; }
     body.buttonsOnly .riderBtn { padding: 16px; }
-    body.buttonsOnly .riderBtn .name { font-size: 22px; }
+    body.buttonsOnly .riderBtn .name { font-size: 24px; }
     body.buttonsOnly .btns { grid-template-columns: 1fr 1fr; }
     @media (min-width: 860px) { body.buttonsOnly .btns { grid-template-columns: 1fr 1fr 1fr 1fr; } }
   </style>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0f17">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>⏱️ Cronómetro 8 pilotos (NETO + mejoras)</h1>
+      <h1>⏱️ Cronómetro Enduro (8 pilotos)</h1>
 
       <div class="topgrid">
         <div>
           <div class="time" id="time">00:00.00</div>
           <div class="sub" id="sub">Listo</div>
 
-          <div class="controls">
-            <div class="row">
-              <button id="startPause" class="primary">Iniciar</button>
-              <button id="reset" class="warn" disabled>Reset tiempo</button>
-              <button id="toggleButtons" disabled>Solo botones</button>
-            </div>
-            <div class="row">
-              <button id="export" class="ok" disabled>Exportar CSV</button>
-              <button id="clearAll" disabled>Vaciar tiempos</button>
-            </div>
+          <div class="controlsTop">
+            <button id="startPause" class="primary">Iniciar</button>
           </div>
 
           <div class="btns" id="ridersBtns"></div>
-          <div class="foot">Consejo: si tocás mal, usá “Deshacer último” por piloto. Exporta CSV y te lo llevás a Excel.</div>
+
+          <!-- Acciones abajo de los 8 botones -->
+          <div class="bottomActions">
+            <button id="reset" class="warn" disabled>Reset tiempo</button>
+            <button id="toggleButtons" disabled>Solo botones</button>
+            <button id="export" class="ok" disabled>Exportar CSV</button>
+            <button id="clearAll" disabled>Vaciar tiempos</button>
+          </div>
+
+          <div class="foot">Tip: Deshacer/Rehacer por piloto. CSV sale listo para Excel con vueltas por columnas.</div>
         </div>
 
         <div class="cfg">
@@ -133,20 +147,20 @@
             </div>
           </div>
 
-          <div class="grid" style="margin-top:10px;">
-            <div><label>Piloto 1</label><input class="rname" data-i="0" value="P1" /></div>
-            <div><label>Piloto 2</label><input class="rname" data-i="1" value="P2" /></div>
-            <div><label>Piloto 3</label><input class="rname" data-i="2" value="P3" /></div>
-            <div><label>Piloto 4</label><input class="rname" data-i="3" value="P4" /></div>
-            <div><label>Piloto 5</label><input class="rname" data-i="4" value="P5" /></div>
-            <div><label>Piloto 6</label><input class="rname" data-i="5" value="P6" /></div>
-            <div><label>Piloto 7</label><input class="rname" data-i="6" value="P7" /></div>
-            <div><label>Piloto 8</label><input class="rname" data-i="7" value="P8" /></div>
+          <div class="grid2">
+            <div><label>Piloto 1</label><input class="rname" data-i="0" /></div>
+            <div><label>Piloto 2</label><input class="rname" data-i="1" /></div>
+            <div><label>Piloto 3</label><input class="rname" data-i="2" /></div>
+            <div><label>Piloto 4</label><input class="rname" data-i="3" /></div>
+            <div><label>Piloto 5</label><input class="rname" data-i="4" /></div>
+            <div><label>Piloto 6</label><input class="rname" data-i="5" /></div>
+            <div><label>Piloto 7</label><input class="rname" data-i="6" /></div>
+            <div><label>Piloto 8</label><input class="rname" data-i="7" /></div>
           </div>
 
           <div class="note">
             <b>NETO</b> = tiempo total - offset de largada (P1=0s, P2=gap, ...).<br/>
-            Si activás parciales, cada tap avanza S1→S2→S3→(VUELTA). Se guarda todo igual en el CSV.
+            Con parciales: cada tap hace S1→S2→S3→(cierra VUELTA).
           </div>
         </div>
       </div>
@@ -158,7 +172,9 @@
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
-  const STORAGE_KEY = "cronometro_equipo_8_v2";
+  const STORAGE_KEY = "cronometro_enduro_v3";
+
+  const DEFAULT_NAMES = ["Esteban","Guille","Ariel","Richard","Gera","Fran","Ale","Franco"];
 
   const elTime = $("time");
   const elSub = $("sub");
@@ -178,14 +194,13 @@
   let elapsedMs = 0;
   let rafId = null;
 
-  // riders[i] = { name, laps: [...], lastTotalMs, lastTotalNetMs, lastTapEpoch, sectorIdx }
+  // riders[i] = { name, events:[...], sectorIdx, lastTapEpoch, redo:[...] }
   let riders = Array.from({length: 8}, (_, i) => ({
-    name: `P${i+1}`,
-    laps: [],               // eventos: laps y parciales
-    lastTotalMs: 0,
-    lastTotalNetMs: 0,
+    name: DEFAULT_NAMES[i],
+    events: [],       // eventos SECTOR/LAP
+    sectorIdx: 0,
     lastTapEpoch: 0,
-    sectorIdx: 0            // 0..(sectors-1) para parciales. Cuando llega al final => marca vuelta y vuelve a 0
+    redo: []          // pila para rehacer
   }));
 
   function format(ms) {
@@ -201,63 +216,53 @@
     return running ? (elapsedMs + (performance.now() - startPerf)) : elapsedMs;
   }
 
-  function getGapMs() {
-    return Math.max(0, Number(elGap.value || 0)) * 1000;
-  }
-  function getDblMs() {
-    return Math.max(0, Number(elDblMs.value || 0));
-  }
-  function getSectors() {
-    return Math.max(0, Number(elSectors.value || 0)); // 0,2,3
-  }
-  function offsetMsFor(i) {
-    return i * getGapMs();
-  }
-  function totalNetMs(i, totalMs) {
-    return Math.max(0, totalMs - offsetMsFor(i));
-  }
+  function getGapMs() { return Math.max(0, Number(elGap.value || 0)) * 1000; }
+  function getDblMs() { return Math.max(0, Number(elDblMs.value || 0)); }
+  function getSectors() { return Math.max(0, Number(elSectors.value || 0)); } // 0,2,3
+  function offsetMsFor(i) { return i * getGapMs(); }
+  function totalNetMs(i, totalMs) { return Math.max(0, totalMs - offsetMsFor(i)); }
 
   function headerText() {
     if (!running) return (elapsedMs > 0 ? "Pausado" : "Listo");
     const sec = getSectors();
-    return sec ? `Corriendo… (parciales ON: ${sec})` : "Corriendo… (vuelta)";
+    return sec ? `Corriendo… (parciales ${sec})` : "Corriendo… (vueltas)";
   }
+
+  function countLaps(r) { return r.events.filter(e => e.kind === "LAP").length; }
+  function lastLap(r) { return [...r.events].reverse().find(e => e.kind === "LAP") || null; }
 
   function renderHeader() {
     elTime.textContent = format(nowElapsed());
     elSub.textContent = headerText();
-    btnReset.disabled = (!running && elapsedMs === 0 && riders.every(r => r.laps.length === 0));
-    btnExport.disabled = riders.every(r => r.laps.length === 0);
-    btnClearAll.disabled = riders.every(r => r.laps.length === 0);
+    btnReset.disabled = (!running && elapsedMs === 0 && riders.every(r => r.events.length === 0));
+    btnExport.disabled = riders.every(r => countLaps(r) === 0);
+    btnClearAll.disabled = riders.every(r => r.events.length === 0);
     btnToggleButtons.disabled = false;
   }
 
   function renderButtons() {
     ridersBtns.innerHTML = "";
     const sec = getSectors();
+
     riders.forEach((r, i) => {
       const b = document.createElement("button");
-      b.className = "riderBtn";
+      b.className = `riderBtn r${i}`;
       b.disabled = !running;
 
-      const last = r.laps[r.laps.length - 1];
-      const lapsCount = r.laps.filter(x => x.kind === "LAP").length;
-      const lastLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+      const lapsN = countLaps(r);
+      const ll = lastLap(r);
 
-      const lastLapStr = lastLap ? format(lastLap.lapNetMs) : "—";
-      const totalStr = lastLap ? format(lastLap.totalNetMs) : "—";
+      const lastLapStr = ll ? format(ll.lapNetMs) : "00:00.00";
+      const totalStr = ll ? format(ll.totalNetMs) : "00:00.00";
 
-      const badge = sec
-        ? `<span class="badge">S${r.sectorIdx + 1}/${sec}</span>`
-        : `<span class="badge">VUELTA</span>`;
+      const nextLapNo = lapsN + 1;
 
+      // Texto como lo pediste
       b.innerHTML = `
-        <div class="name">${r.name} ${badge}</div>
-        <div class="meta">
-          <div>Vtas: <b>${lapsCount}</b></div>
-          <div>Últ vta: <b>${lastLapStr}</b></div>
-        </div>
-        <div class="hint">Total neto: ${totalStr} · Tap para guardar</div>
+        <div class="name">${r.name}</div>
+        <div class="line1">${sec ? `Parcial ${r.sectorIdx+1}/${sec}` : `Vuelta ${nextLapNo}`}</div>
+        <div class="line2"><span class="label">última vta</span><span class="val">${lastLapStr}</span></div>
+        <div class="line2"><span class="label">total neto</span><span class="val">${totalStr}</span></div>
       `;
       b.addEventListener("click", () => mark(i));
       ridersBtns.appendChild(b);
@@ -268,15 +273,16 @@
     tables.innerHTML = "";
     riders.forEach((r, i) => {
       const offSec = Math.round(offsetMsFor(i)/1000);
-      const lapsOnly = r.laps.filter(x => x.kind === "LAP");
 
       const card = document.createElement("div");
       card.className = "tableCard";
       card.innerHTML = `
         <h3>${r.name} <span style="opacity:.7;font-weight:650;">(offset ${offSec}s)</span></h3>
+
         <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-          <button data-undo="${i}" ${r.laps.length ? "" : "disabled"}>Deshacer último</button>
-          <button data-clear="${i}" ${r.laps.length ? "" : "disabled"}>Vaciar ${r.name}</button>
+          <button data-undo="${i}" ${r.events.length ? "" : "disabled"}>Deshacer</button>
+          <button data-redo="${i}" ${r.redo.length ? "" : "disabled"}>Rehacer</button>
+          <button data-clear="${i}" ${r.events.length ? "" : "disabled"}>Vaciar</button>
         </div>
 
         <div class="scroll">
@@ -291,8 +297,8 @@
             </thead>
             <tbody>
               ${
-                r.laps.length
-                ? r.laps.map((e, idx) => `
+                r.events.length
+                ? r.events.map(e => `
                     <tr>
                       <td>${e.kind === "LAP" ? e.lapNo : ""}</td>
                       <td>${e.kind === "LAP" ? "VUELTA" : ("S"+e.sectorNo)}</td>
@@ -309,8 +315,15 @@
       tables.appendChild(card);
     });
 
-    tables.querySelectorAll("button[data-undo]").forEach(btn => btn.addEventListener("click", () => undoLast(Number(btn.dataset.undo))));
-    tables.querySelectorAll("button[data-clear]").forEach(btn => btn.addEventListener("click", () => clearRider(Number(btn.dataset.clear))));
+    tables.querySelectorAll("button[data-undo]").forEach(btn =>
+      btn.addEventListener("click", () => undo(Number(btn.dataset.undo)))
+    );
+    tables.querySelectorAll("button[data-redo]").forEach(btn =>
+      btn.addEventListener("click", () => redo(Number(btn.dataset.redo)))
+    );
+    tables.querySelectorAll("button[data-clear]").forEach(btn =>
+      btn.addEventListener("click", () => clearRider(Number(btn.dataset.clear)))
+    );
   }
 
   function renderAll() {
@@ -339,21 +352,52 @@
 
   function load() {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      // set defaults in inputs
+      document.querySelectorAll(".rname").forEach((inp) => {
+        const i = Number(inp.dataset.i);
+        inp.value = DEFAULT_NAMES[i];
+      });
+      return;
+    }
     try {
       const s = JSON.parse(raw);
-      if (Array.isArray(s.riders) && s.riders.length === 8) riders = s.riders;
+
       if (typeof s.gapSec === "number") elGap.value = String(s.gapSec);
       if (typeof s.dblMs === "number") elDblMs.value = String(s.dblMs);
       if (typeof s.sectors === "number") elSectors.value = String(s.sectors);
+
+      if (Array.isArray(s.riders) && s.riders.length === 8) {
+        riders = s.riders.map((r, i) => ({
+          name: (r.name || DEFAULT_NAMES[i]),
+          events: Array.isArray(r.events) ? r.events : [],
+          sectorIdx: Number(r.sectorIdx || 0),
+          lastTapEpoch: Number(r.lastTapEpoch || 0),
+          redo: Array.isArray(r.redo) ? r.redo : []
+        }));
+      } else {
+        // defaults
+        riders.forEach((r,i) => r.name = DEFAULT_NAMES[i]);
+      }
+
+      document.querySelectorAll(".rname").forEach((inp) => {
+        const i = Number(inp.dataset.i);
+        inp.value = riders[i].name || DEFAULT_NAMES[i];
+      });
 
       elapsedMs = Number(s.elapsedMs || 0);
       if (s.running && s.startedAtEpoch) {
         const extra = Date.now() - Number(s.startedAtEpoch);
         elapsedMs += Math.max(0, extra);
       }
-      running = false; // se reanuda manual, más seguro
-    } catch {}
+      running = false; // reanuda manual (seguro)
+    } catch {
+      // defaults
+      document.querySelectorAll(".rname").forEach((inp) => {
+        const i = Number(inp.dataset.i);
+        inp.value = DEFAULT_NAMES[i];
+      });
+    }
   }
 
   function start() {
@@ -374,7 +418,6 @@
   }
 
   function resetTimeOnly() {
-    // Reinicia el reloj, NO borra datos (por si querés conservar vueltas ya tomadas)
     running = false;
     elapsedMs = 0;
     startPerf = 0;
@@ -384,14 +427,16 @@
   }
 
   function clearAll() {
-    riders.forEach(r => {
-      r.laps = [];
-      r.lastTotalMs = 0;
-      r.lastTotalNetMs = 0;
-      r.lastTapEpoch = 0;
-      r.sectorIdx = 0;
-    });
+    riders.forEach(r => { r.events = []; r.redo = []; r.sectorIdx = 0; r.lastTapEpoch = 0; });
     renderAll(); save();
+  }
+
+  function recomputeSectorIdx(r) {
+    const sectors = getSectors();
+    if (sectors <= 0) { r.sectorIdx = 0; return; }
+    const lastSector = [...r.events].reverse().find(e => e.kind === "SECTOR");
+    if (!lastSector) r.sectorIdx = 0;
+    else r.sectorIdx = (Number(lastSector.sectorNo) % sectors);
   }
 
   function mark(i) {
@@ -400,10 +445,12 @@
     const r = riders[i];
 
     if (dbl > 0 && (tEpoch - (r.lastTapEpoch || 0)) < dbl) {
-      // confirmación para evitar doble tap accidental
       if (!confirm(`¿Confirmás el tap seguido para ${r.name}?`)) return;
     }
     r.lastTapEpoch = tEpoch;
+
+    // Si marcás algo nuevo, se borra la pila de rehacer (comportamiento estándar)
+    r.redo = [];
 
     const totalMs = nowElapsed();
     const netMs = totalNetMs(i, totalMs);
@@ -411,13 +458,13 @@
     const sectors = getSectors();
     const isSectors = sectors > 0;
 
-    // delta neto desde el último registro (sea sector o vuelta)
-    const lastNet = (r.laps.length ? r.laps[r.laps.length - 1].totalNetMs : 0);
+    const lastNet = (r.events.length ? r.events[r.events.length - 1].totalNetMs : 0);
     const deltaNet = netMs - lastNet;
 
     if (isSectors) {
       const sectorNo = r.sectorIdx + 1;
-      r.laps.push({
+
+      r.events.push({
         kind: "SECTOR",
         riderIndex: i,
         riderName: r.name,
@@ -428,18 +475,15 @@
         stampEpoch: tEpoch
       });
 
-      r.sectorIdx = (r.sectorIdx + 1);
+      r.sectorIdx++;
 
-      // Si completó el último sector => cerramos vuelta automáticamente
       if (r.sectorIdx >= sectors) {
-        const lapNo = r.laps.filter(x => x.kind === "LAP").length + 1;
-
-        // lap neto = desde último LAP (no desde último sector)
-        const prevLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+        const lapNo = r.events.filter(x => x.kind === "LAP").length + 1;
+        const prevLap = [...r.events].reverse().find(x => x.kind === "LAP");
         const prevLapTotalNet = prevLap ? prevLap.totalNetMs : 0;
         const lapNet = netMs - prevLapTotalNet;
 
-        r.laps.push({
+        r.events.push({
           kind: "LAP",
           riderIndex: i,
           riderName: r.name,
@@ -454,12 +498,12 @@
         r.sectorIdx = 0;
       }
     } else {
-      const lapNo = r.laps.filter(x => x.kind === "LAP").length + 1;
-      const prevLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+      const lapNo = r.events.filter(x => x.kind === "LAP").length + 1;
+      const prevLap = [...r.events].reverse().find(x => x.kind === "LAP");
       const prevLapTotalNet = prevLap ? prevLap.totalNetMs : 0;
       const lapNet = netMs - prevLapTotalNet;
 
-      r.laps.push({
+      r.events.push({
         kind: "LAP",
         riderIndex: i,
         riderName: r.name,
@@ -475,128 +519,118 @@
     renderAll(); save();
   }
 
-  function undoLast(i) {
+  function undo(i) {
     const r = riders[i];
-    const last = r.laps.pop();
+    const last = r.events.pop();
     if (!last) return;
+    r.redo.push(last);
+    recomputeSectorIdx(r);
+    renderAll(); save();
+  }
 
-    // Recalcular sectorIdx para que quede consistente si estás en modo parciales
-    const sectors = getSectors();
-    if (sectors > 0) {
-      // buscar el último evento SECTOR y ver en qué sector debería estar
-      const lastSector = [...r.laps].reverse().find(x => x.kind === "SECTOR");
-      if (!lastSector) r.sectorIdx = 0;
-      else r.sectorIdx = (lastSector.sectorNo % sectors);
-    } else {
-      r.sectorIdx = 0;
-    }
-
+  function redo(i) {
+    const r = riders[i];
+    const item = r.redo.pop();
+    if (!item) return;
+    r.events.push(item);
+    recomputeSectorIdx(r);
     renderAll(); save();
   }
 
   function clearRider(i) {
     const r = riders[i];
-    r.laps = [];
+    r.events = [];
+    r.redo = [];
     r.sectorIdx = 0;
     r.lastTapEpoch = 0;
     renderAll(); save();
   }
 
-  function csvSafe(v) {
+  function csvSafeSemi(v) {
+    // CSV con ; (mejor para Excel AR). Si hay ; o comillas o saltos, se comilla.
     const s = String(v ?? "");
-    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    if (/[;"\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
     return s;
   }
 
-  function exportCSV() {
-    // CSV “largo”: una fila por evento (sector o lap), incluye neto y bruto en ms y formateado
+  function exportCSVWide() {
+    // Tabla ancha: piloto; cant vtas; vta1; vta2; ...; tiempo total
+    const lapsByRider = riders.map(r => r.events.filter(e => e.kind === "LAP").map(e => format(e.lapNetMs)));
+    const totalsByRider = riders.map(r => {
+      const ll = lastLap(r);
+      return ll ? format(ll.totalNetMs) : "00:00.00";
+    });
+    const maxLaps = Math.max(0, ...lapsByRider.map(a => a.length));
+
+    const headers = ["piloto","cant vtas"];
+    for (let k=1; k<=maxLaps; k++) headers.push(`vta${k}`);
+    headers.push("tiempo total");
+
     const rows = [];
-    rows.push([
-      "rider","rider_index","gap_sec","event_kind","lap_no","sector_no",
-      "delta_neto_mmsscc","total_neto_mmsscc","delta_neto_ms","total_neto_ms",
-      "total_bruto_mmsscc","total_bruto_ms","timestamp_epoch"
-    ].join(","));
+    rows.push(headers.map(csvSafeSemi).join(";"));
 
-    const gapSec = Math.round(getGapMs()/1000);
-
-    riders.forEach((r, i) => {
-      r.laps.forEach(e => {
-        const deltaNet = e.deltaNetMs ?? e.lapNetMs ?? 0;
-        rows.push([
-          csvSafe(r.name),
-          i,
-          gapSec,
-          e.kind,
-          e.kind === "LAP" ? e.lapNo : "",
-          e.kind === "SECTOR" ? e.sectorNo : "",
-          csvSafe(format(deltaNet)),
-          csvSafe(format(e.totalNetMs)),
-          Math.round(deltaNet),
-          Math.round(e.totalNetMs),
-          csvSafe(format(e.totalMs)),
-          Math.round(e.totalMs),
-          e.stampEpoch
-        ].join(","));
-      });
+    riders.forEach((r, idx) => {
+      const laps = lapsByRider[idx];
+      const row = [r.name, String(laps.length)];
+      for (let k=0; k<maxLaps; k++) row.push(laps[k] ?? "");
+      row.push(totalsByRider[idx]);
+      rows.push(row.map(csvSafeSemi).join(";"));
     });
 
     const blob = new Blob([rows.join("\n")], {type: "text/csv;charset=utf-8"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `tiempos_equipo_v2_${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.csv`;
+    a.download = `tiempos_enduro_${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
   }
 
-  // wiring
+  // Wiring
   btnStartPause.addEventListener("click", () => running ? pause() : start());
   btnReset.addEventListener("click", resetTimeOnly);
-  btnClearAll.addEventListener("click", () => { if (confirm("¿Vaciar TODOS los registros de todos los pilotos?")) clearAll(); });
-  btnExport.addEventListener("click", exportCSV);
+  btnClearAll.addEventListener("click", () => { if (confirm("¿Vaciar TODOS los registros?")) clearAll(); });
+  btnExport.addEventListener("click", exportCSVWide);
 
   btnToggleButtons.addEventListener("click", () => {
     document.body.classList.toggle("buttonsOnly");
     save();
   });
 
-  // nombres
+  // Nombres editables
   document.querySelectorAll(".rname").forEach(inp => {
+    const i = Number(inp.dataset.i);
+    inp.value = riders[i].name || DEFAULT_NAMES[i];
+
     inp.addEventListener("input", () => {
-      const i = Number(inp.dataset.i);
-      riders[i].name = (inp.value || `P${i+1}`).trim();
+      riders[i].name = (inp.value || DEFAULT_NAMES[i]).trim();
       renderAll(); save();
     });
   });
 
-  // config changes
   elGap.addEventListener("input", () => { renderAll(); save(); });
   elDblMs.addEventListener("input", () => { save(); });
   elSectors.addEventListener("change", () => {
-    // al cambiar modo parciales, reseteo “posición de sector” (para no mezclar)
-    riders.forEach(r => r.sectorIdx = 0);
+    riders.forEach(r => { r.sectorIdx = 0; r.redo = []; });
     renderAll(); save();
   });
 
-  // load and go
+  // Load state + render
   load();
   renderAll();
 
   window.addEventListener("visibilitychange", () => save());
   window.addEventListener("beforeunload", () => save());
-})();
-</script>
 
-<script>
-  // Register Service Worker for offline use (PWA)
+  // SW
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js").catch(() => {});
     });
   }
+})();
 </script>
-
 </body>
 </html>
