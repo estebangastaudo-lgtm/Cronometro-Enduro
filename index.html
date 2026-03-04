@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cronómetro Equipo v2</title>
+  <style>
+    :root { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; background: #0b0f17; color: #e8eefc; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 14px; }
+    .card { background: #121a2a; border: 1px solid #1f2a44; border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    h1 { font-size: 16px; margin: 0 0 10px; font-weight: 900; letter-spacing: .2px; opacity: .95; }
+    .time { font-variant-numeric: tabular-nums; font-size: 52px; line-height: 1; margin: 10px 0 8px; font-weight: 950; }
+    .sub { font-variant-numeric: tabular-nums; opacity: .82; margin-bottom: 10px; }
+
+    .topgrid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 860px) { .topgrid { grid-template-columns: 1.1fr .9fr; } }
+
+    .controls { display: grid; gap: 10px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      padding: 14px 12px; border-radius: 14px; border: 1px solid #26365c;
+      background: #1a2642; color: #e8eefc; font-size: 16px; font-weight: 850;
+      cursor: pointer; touch-action: manipulation;
+    }
+    button:active { transform: scale(.99); }
+    button.primary { background: #2a4cff; border-color: #2a4cff; }
+    button.warn { background: #2b1a1a; border-color: #5a2a2a; color: #ffd6d6; }
+    button.ok { background: #17301f; border-color: #2a5a3a; color: #d8ffe7; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    .cfg { background: #0e1526; border: 1px solid #1f2a44; border-radius: 14px; padding: 12px; }
+    .cfg h2 { margin: 0 0 10px; font-size: 14px; opacity: .9; }
+    .cfg .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cfg .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .cfg label { font-size: 12px; opacity: .82; display: block; margin-bottom: 4px; }
+    .cfg input, .cfg select {
+      width: 100%; box-sizing: border-box;
+      background: #121a2a; border: 1px solid #26365c; color: #e8eefc;
+      padding: 10px 10px; border-radius: 10px; font-size: 14px;
+    }
+    .cfg .note { margin-top: 8px; font-size: 12px; opacity: .7; line-height: 1.25; }
+
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (min-width: 860px) { .btns { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+
+    .riderBtn {
+      display: grid; gap: 6px;
+      background: #0e1526; border: 1px solid #1f2a44; border-radius: 14px;
+      padding: 12px; text-align: left;
+    }
+    .riderBtn .name { font-weight: 950; font-size: 18px; }
+    .riderBtn .meta { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; opacity: .9; font-size: 13px; }
+    .riderBtn .hint { opacity: .7; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .riderBtn .badge { display:inline-block; padding: 2px 8px; border-radius: 999px; border:1px solid #26365c; font-size: 12px; opacity: .9; }
+
+    .tables { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
+    @media (min-width: 860px) { .tables { grid-template-columns: 1fr 1fr; } }
+
+    .tableCard { background: #0e1526; border: 1px solid #1f2a44; border-radius: 14px; padding: 12px; }
+    .tableCard h3 { margin: 0 0 8px; font-size: 14px; opacity: .92; }
+    .tableCard .scroll { max-height: 360px; overflow: auto; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th, td { padding: 8px 8px; border-bottom: 1px solid #1f2a44; font-size: 13px; }
+    th { position: sticky; top: 0; background: #0e1526; text-align: left; opacity: .92; }
+    td:last-child, th:last-child { text-align: right; }
+
+    .foot { margin-top: 10px; font-size: 12px; opacity: .65; }
+
+    /* Modo solo botones */
+    body.buttonsOnly .cfg,
+    body.buttonsOnly .tables,
+    body.buttonsOnly .foot { display: none; }
+    body.buttonsOnly .wrap { max-width: 1000px; }
+    body.buttonsOnly .time { font-size: 58px; }
+    body.buttonsOnly .riderBtn { padding: 16px; }
+    body.buttonsOnly .riderBtn .name { font-size: 22px; }
+    body.buttonsOnly .btns { grid-template-columns: 1fr 1fr; }
+    @media (min-width: 860px) { body.buttonsOnly .btns { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+  </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>⏱️ Cronómetro 8 pilotos (NETO + mejoras)</h1>
+
+      <div class="topgrid">
+        <div>
+          <div class="time" id="time">00:00.00</div>
+          <div class="sub" id="sub">Listo</div>
+
+          <div class="controls">
+            <div class="row">
+              <button id="startPause" class="primary">Iniciar</button>
+              <button id="reset" class="warn" disabled>Reset tiempo</button>
+              <button id="toggleButtons" disabled>Solo botones</button>
+            </div>
+            <div class="row">
+              <button id="export" class="ok" disabled>Exportar CSV</button>
+              <button id="clearAll" disabled>Vaciar tiempos</button>
+            </div>
+          </div>
+
+          <div class="btns" id="ridersBtns"></div>
+          <div class="foot">Consejo: si tocás mal, usá “Deshacer último” por piloto. Exporta CSV y te lo llevás a Excel.</div>
+        </div>
+
+        <div class="cfg">
+          <h2>Configuración (antes de arrancar)</h2>
+
+          <div class="grid3">
+            <div>
+              <label>Gap largada (seg)</label>
+              <input id="gap" type="number" min="0" step="1" value="15" />
+            </div>
+            <div>
+              <label>Anti doble-tap (ms)</label>
+              <input id="dblMs" type="number" min="0" step="100" value="2000" />
+            </div>
+            <div>
+              <label>Parciales</label>
+              <select id="sectors">
+                <option value="0" selected>OFF (solo vuelta)</option>
+                <option value="2">ON (2 parciales)</option>
+                <option value="3">ON (3 parciales)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:10px;">
+            <div><label>Piloto 1</label><input class="rname" data-i="0" value="P1" /></div>
+            <div><label>Piloto 2</label><input class="rname" data-i="1" value="P2" /></div>
+            <div><label>Piloto 3</label><input class="rname" data-i="2" value="P3" /></div>
+            <div><label>Piloto 4</label><input class="rname" data-i="3" value="P4" /></div>
+            <div><label>Piloto 5</label><input class="rname" data-i="4" value="P5" /></div>
+            <div><label>Piloto 6</label><input class="rname" data-i="5" value="P6" /></div>
+            <div><label>Piloto 7</label><input class="rname" data-i="6" value="P7" /></div>
+            <div><label>Piloto 8</label><input class="rname" data-i="7" value="P8" /></div>
+          </div>
+
+          <div class="note">
+            <b>NETO</b> = tiempo total - offset de largada (P1=0s, P2=gap, ...).<br/>
+            Si activás parciales, cada tap avanza S1→S2→S3→(VUELTA). Se guarda todo igual en el CSV.
+          </div>
+        </div>
+      </div>
+
+      <div class="tables" id="tables"></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = "cronometro_equipo_8_v2";
+
+  const elTime = $("time");
+  const elSub = $("sub");
+  const btnStartPause = $("startPause");
+  const btnReset = $("reset");
+  const btnExport = $("export");
+  const btnClearAll = $("clearAll");
+  const btnToggleButtons = $("toggleButtons");
+  const elGap = $("gap");
+  const elDblMs = $("dblMs");
+  const elSectors = $("sectors");
+  const ridersBtns = $("ridersBtns");
+  const tables = $("tables");
+
+  let running = false;
+  let startPerf = 0;
+  let elapsedMs = 0;
+  let rafId = null;
+
+  // riders[i] = { name, laps: [...], lastTotalMs, lastTotalNetMs, lastTapEpoch, sectorIdx }
+  let riders = Array.from({length: 8}, (_, i) => ({
+    name: `P${i+1}`,
+    laps: [],               // eventos: laps y parciales
+    lastTotalMs: 0,
+    lastTotalNetMs: 0,
+    lastTapEpoch: 0,
+    sectorIdx: 0            // 0..(sectors-1) para parciales. Cuando llega al final => marca vuelta y vuelve a 0
+  }));
+
+  function format(ms) {
+    ms = Math.max(0, Math.floor(ms));
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const centis = Math.floor((ms % 1000) / 10);
+    return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}.${String(centis).padStart(2,"0")}`;
+  }
+
+  function nowElapsed() {
+    return running ? (elapsedMs + (performance.now() - startPerf)) : elapsedMs;
+  }
+
+  function getGapMs() {
+    return Math.max(0, Number(elGap.value || 0)) * 1000;
+  }
+  function getDblMs() {
+    return Math.max(0, Number(elDblMs.value || 0));
+  }
+  function getSectors() {
+    return Math.max(0, Number(elSectors.value || 0)); // 0,2,3
+  }
+  function offsetMsFor(i) {
+    return i * getGapMs();
+  }
+  function totalNetMs(i, totalMs) {
+    return Math.max(0, totalMs - offsetMsFor(i));
+  }
+
+  function headerText() {
+    if (!running) return (elapsedMs > 0 ? "Pausado" : "Listo");
+    const sec = getSectors();
+    return sec ? `Corriendo… (parciales ON: ${sec})` : "Corriendo… (vuelta)";
+  }
+
+  function renderHeader() {
+    elTime.textContent = format(nowElapsed());
+    elSub.textContent = headerText();
+    btnReset.disabled = (!running && elapsedMs === 0 && riders.every(r => r.laps.length === 0));
+    btnExport.disabled = riders.every(r => r.laps.length === 0);
+    btnClearAll.disabled = riders.every(r => r.laps.length === 0);
+    btnToggleButtons.disabled = false;
+  }
+
+  function renderButtons() {
+    ridersBtns.innerHTML = "";
+    const sec = getSectors();
+    riders.forEach((r, i) => {
+      const b = document.createElement("button");
+      b.className = "riderBtn";
+      b.disabled = !running;
+
+      const last = r.laps[r.laps.length - 1];
+      const lapsCount = r.laps.filter(x => x.kind === "LAP").length;
+      const lastLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+
+      const lastLapStr = lastLap ? format(lastLap.lapNetMs) : "—";
+      const totalStr = lastLap ? format(lastLap.totalNetMs) : "—";
+
+      const badge = sec
+        ? `<span class="badge">S${r.sectorIdx + 1}/${sec}</span>`
+        : `<span class="badge">VUELTA</span>`;
+
+      b.innerHTML = `
+        <div class="name">${r.name} ${badge}</div>
+        <div class="meta">
+          <div>Vtas: <b>${lapsCount}</b></div>
+          <div>Últ vta: <b>${lastLapStr}</b></div>
+        </div>
+        <div class="hint">Total neto: ${totalStr} · Tap para guardar</div>
+      `;
+      b.addEventListener("click", () => mark(i));
+      ridersBtns.appendChild(b);
+    });
+  }
+
+  function renderTables() {
+    tables.innerHTML = "";
+    riders.forEach((r, i) => {
+      const offSec = Math.round(offsetMsFor(i)/1000);
+      const lapsOnly = r.laps.filter(x => x.kind === "LAP");
+
+      const card = document.createElement("div");
+      card.className = "tableCard";
+      card.innerHTML = `
+        <h3>${r.name} <span style="opacity:.7;font-weight:650;">(offset ${offSec}s)</span></h3>
+        <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+          <button data-undo="${i}" ${r.laps.length ? "" : "disabled"}>Deshacer último</button>
+          <button data-clear="${i}" ${r.laps.length ? "" : "disabled"}>Vaciar ${r.name}</button>
+        </div>
+
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tipo</th>
+                <th>Δ (neto)</th>
+                <th>Total (neto)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                r.laps.length
+                ? r.laps.map((e, idx) => `
+                    <tr>
+                      <td>${e.kind === "LAP" ? e.lapNo : ""}</td>
+                      <td>${e.kind === "LAP" ? "VUELTA" : ("S"+e.sectorNo)}</td>
+                      <td>${format(e.deltaNetMs)}</td>
+                      <td>${format(e.totalNetMs)}</td>
+                    </tr>
+                  `).join("")
+                : `<tr><td colspan="4" style="opacity:.7;">Sin registros todavía</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>
+      `;
+      tables.appendChild(card);
+    });
+
+    tables.querySelectorAll("button[data-undo]").forEach(btn => btn.addEventListener("click", () => undoLast(Number(btn.dataset.undo))));
+    tables.querySelectorAll("button[data-clear]").forEach(btn => btn.addEventListener("click", () => clearRider(Number(btn.dataset.clear))));
+  }
+
+  function renderAll() {
+    renderHeader();
+    renderButtons();
+    renderTables();
+  }
+
+  function tick() {
+    renderHeader();
+    if (running) rafId = requestAnimationFrame(tick);
+  }
+
+  function save() {
+    const state = {
+      running,
+      elapsedMs,
+      startedAtEpoch: running ? Date.now() : null,
+      gapSec: Number(elGap.value || 0),
+      dblMs: Number(elDblMs.value || 0),
+      sectors: Number(elSectors.value || 0),
+      riders
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function load() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const s = JSON.parse(raw);
+      if (Array.isArray(s.riders) && s.riders.length === 8) riders = s.riders;
+      if (typeof s.gapSec === "number") elGap.value = String(s.gapSec);
+      if (typeof s.dblMs === "number") elDblMs.value = String(s.dblMs);
+      if (typeof s.sectors === "number") elSectors.value = String(s.sectors);
+
+      elapsedMs = Number(s.elapsedMs || 0);
+      if (s.running && s.startedAtEpoch) {
+        const extra = Date.now() - Number(s.startedAtEpoch);
+        elapsedMs += Math.max(0, extra);
+      }
+      running = false; // se reanuda manual, más seguro
+    } catch {}
+  }
+
+  function start() {
+    running = true;
+    startPerf = performance.now();
+    btnStartPause.textContent = "Pausar";
+    btnReset.disabled = false;
+    if (!rafId) rafId = requestAnimationFrame(tick);
+    renderAll(); save();
+  }
+
+  function pause() {
+    elapsedMs = nowElapsed();
+    running = false;
+    btnStartPause.textContent = "Iniciar";
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    renderAll(); save();
+  }
+
+  function resetTimeOnly() {
+    // Reinicia el reloj, NO borra datos (por si querés conservar vueltas ya tomadas)
+    running = false;
+    elapsedMs = 0;
+    startPerf = 0;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    btnStartPause.textContent = "Iniciar";
+    renderAll(); save();
+  }
+
+  function clearAll() {
+    riders.forEach(r => {
+      r.laps = [];
+      r.lastTotalMs = 0;
+      r.lastTotalNetMs = 0;
+      r.lastTapEpoch = 0;
+      r.sectorIdx = 0;
+    });
+    renderAll(); save();
+  }
+
+  function mark(i) {
+    const tEpoch = Date.now();
+    const dbl = getDblMs();
+    const r = riders[i];
+
+    if (dbl > 0 && (tEpoch - (r.lastTapEpoch || 0)) < dbl) {
+      // confirmación para evitar doble tap accidental
+      if (!confirm(`¿Confirmás el tap seguido para ${r.name}?`)) return;
+    }
+    r.lastTapEpoch = tEpoch;
+
+    const totalMs = nowElapsed();
+    const netMs = totalNetMs(i, totalMs);
+
+    const sectors = getSectors();
+    const isSectors = sectors > 0;
+
+    // delta neto desde el último registro (sea sector o vuelta)
+    const lastNet = (r.laps.length ? r.laps[r.laps.length - 1].totalNetMs : 0);
+    const deltaNet = netMs - lastNet;
+
+    if (isSectors) {
+      const sectorNo = r.sectorIdx + 1;
+      r.laps.push({
+        kind: "SECTOR",
+        riderIndex: i,
+        riderName: r.name,
+        sectorNo,
+        totalMs,
+        totalNetMs: netMs,
+        deltaNetMs: deltaNet,
+        stampEpoch: tEpoch
+      });
+
+      r.sectorIdx = (r.sectorIdx + 1);
+
+      // Si completó el último sector => cerramos vuelta automáticamente
+      if (r.sectorIdx >= sectors) {
+        const lapNo = r.laps.filter(x => x.kind === "LAP").length + 1;
+
+        // lap neto = desde último LAP (no desde último sector)
+        const prevLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+        const prevLapTotalNet = prevLap ? prevLap.totalNetMs : 0;
+        const lapNet = netMs - prevLapTotalNet;
+
+        r.laps.push({
+          kind: "LAP",
+          riderIndex: i,
+          riderName: r.name,
+          lapNo,
+          totalMs,
+          totalNetMs: netMs,
+          deltaNetMs: lapNet,
+          lapNetMs: lapNet,
+          stampEpoch: tEpoch
+        });
+
+        r.sectorIdx = 0;
+      }
+    } else {
+      const lapNo = r.laps.filter(x => x.kind === "LAP").length + 1;
+      const prevLap = [...r.laps].reverse().find(x => x.kind === "LAP");
+      const prevLapTotalNet = prevLap ? prevLap.totalNetMs : 0;
+      const lapNet = netMs - prevLapTotalNet;
+
+      r.laps.push({
+        kind: "LAP",
+        riderIndex: i,
+        riderName: r.name,
+        lapNo,
+        totalMs,
+        totalNetMs: netMs,
+        deltaNetMs: lapNet,
+        lapNetMs: lapNet,
+        stampEpoch: tEpoch
+      });
+    }
+
+    renderAll(); save();
+  }
+
+  function undoLast(i) {
+    const r = riders[i];
+    const last = r.laps.pop();
+    if (!last) return;
+
+    // Recalcular sectorIdx para que quede consistente si estás en modo parciales
+    const sectors = getSectors();
+    if (sectors > 0) {
+      // buscar el último evento SECTOR y ver en qué sector debería estar
+      const lastSector = [...r.laps].reverse().find(x => x.kind === "SECTOR");
+      if (!lastSector) r.sectorIdx = 0;
+      else r.sectorIdx = (lastSector.sectorNo % sectors);
+    } else {
+      r.sectorIdx = 0;
+    }
+
+    renderAll(); save();
+  }
+
+  function clearRider(i) {
+    const r = riders[i];
+    r.laps = [];
+    r.sectorIdx = 0;
+    r.lastTapEpoch = 0;
+    renderAll(); save();
+  }
+
+  function csvSafe(v) {
+    const s = String(v ?? "");
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  }
+
+  function exportCSV() {
+    // CSV “largo”: una fila por evento (sector o lap), incluye neto y bruto en ms y formateado
+    const rows = [];
+    rows.push([
+      "rider","rider_index","gap_sec","event_kind","lap_no","sector_no",
+      "delta_neto_mmsscc","total_neto_mmsscc","delta_neto_ms","total_neto_ms",
+      "total_bruto_mmsscc","total_bruto_ms","timestamp_epoch"
+    ].join(","));
+
+    const gapSec = Math.round(getGapMs()/1000);
+
+    riders.forEach((r, i) => {
+      r.laps.forEach(e => {
+        const deltaNet = e.deltaNetMs ?? e.lapNetMs ?? 0;
+        rows.push([
+          csvSafe(r.name),
+          i,
+          gapSec,
+          e.kind,
+          e.kind === "LAP" ? e.lapNo : "",
+          e.kind === "SECTOR" ? e.sectorNo : "",
+          csvSafe(format(deltaNet)),
+          csvSafe(format(e.totalNetMs)),
+          Math.round(deltaNet),
+          Math.round(e.totalNetMs),
+          csvSafe(format(e.totalMs)),
+          Math.round(e.totalMs),
+          e.stampEpoch
+        ].join(","));
+      });
+    });
+
+    const blob = new Blob([rows.join("\n")], {type: "text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tiempos_equipo_v2_${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // wiring
+  btnStartPause.addEventListener("click", () => running ? pause() : start());
+  btnReset.addEventListener("click", resetTimeOnly);
+  btnClearAll.addEventListener("click", () => { if (confirm("¿Vaciar TODOS los registros de todos los pilotos?")) clearAll(); });
+  btnExport.addEventListener("click", exportCSV);
+
+  btnToggleButtons.addEventListener("click", () => {
+    document.body.classList.toggle("buttonsOnly");
+    save();
+  });
+
+  // nombres
+  document.querySelectorAll(".rname").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const i = Number(inp.dataset.i);
+      riders[i].name = (inp.value || `P${i+1}`).trim();
+      renderAll(); save();
+    });
+  });
+
+  // config changes
+  elGap.addEventListener("input", () => { renderAll(); save(); });
+  elDblMs.addEventListener("input", () => { save(); });
+  elSectors.addEventListener("change", () => {
+    // al cambiar modo parciales, reseteo “posición de sector” (para no mezclar)
+    riders.forEach(r => r.sectorIdx = 0);
+    renderAll(); save();
+  });
+
+  // load and go
+  load();
+  renderAll();
+
+  window.addEventListener("visibilitychange", () => save());
+  window.addEventListener("beforeunload", () => save());
+})();
+</script>
+
+<script>
+  // Register Service Worker for offline use (PWA)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>

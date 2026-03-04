@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0b0f17"/>
+  <circle cx="256" cy="280" r="150" fill="#121a2a" stroke="#2a4cff" stroke-width="18"/>
+  <path d="M256 280 L256 190" stroke="#e8eefc" stroke-width="18" stroke-linecap="round"/>
+  <path d="M256 280 L330 320" stroke="#e8eefc" stroke-width="18" stroke-linecap="round"/>
+  <rect x="200" y="82" width="112" height="56" rx="18" fill="#2a4cff"/>
+  <text x="256" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#0b0f17">LAP</text>
+</svg>
